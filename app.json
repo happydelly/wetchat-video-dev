@@ -1,11 +1,12 @@
 {
   "pages": [
     "pages/userLogin/login",
+    "pages/index/index",
+    "pages/moon/moon",
     "pages/chooseBgm/chooseBgm",
     "pages/test/test",
     "pages/mine/mine",
-    "pages/userRegist/regist",
-    "pages/index/index"
+    "pages/userRegist/regist"
   ],
   "window": {
     "backgroundTextStyle": "light",
@@ -13,5 +14,6 @@
     "navigationBarTitleText": "短视频",
     "navigationBarTextStyle": "black"
   },
-  "debug": true
+  "debug": true,
+  "sitemapLocation": "sitemap92.json"
 }
