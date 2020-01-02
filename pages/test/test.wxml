@@ -1,0 +1,7 @@
+<block wx:for="{{songList}}">
+  <iaudio src="{{item.src}}"
+          songName="{{item.songName}}"
+          singer="{{item.singer}}"
+          duration="{{item.duration}}" >
+  </iaudio>
+</block>
