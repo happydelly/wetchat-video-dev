@@ -27,7 +27,9 @@ Page({
         url: serverUrl + '/bgm/list',
         method: "POST",
         header: {
-          'content-type': 'application/json' // 默认值
+          'content-type': 'application/json', // 默认值
+          'headerUserId': user.id,
+          'headerUserToken': user.userToken
         },
         success: function (res) {
           console.log(res.data);
@@ -39,6 +41,17 @@ Page({
               serverUrl :serverUrl
             })
 
+          } else if (res.data.status == 502) {
+            wx.showToast({
+              title: res.data.msg,
+              duration: 3000,
+              icon: "none",
+              success: function () {
+                wx.redirectTo({
+                  url: '../userLogin/login',
+                })
+              }
+            })
           }
         }
       })
@@ -56,6 +69,14 @@ Page({
       var tempCoverUrl = me.data.videoParams.tempCoverUrl; 
 
       var serverUrl = app.serverUrl;
+      var userInfo = app.getGlobalUserInfo();
+      
+      if(userInfo == null || userInfo =="" || userInfo == undefined){
+        wx.navigateTo({
+          url: '../userLogin/login',
+        })
+      }
+
       wx.showLoading({
         title: '上传中...',
       });
@@ -63,7 +84,7 @@ Page({
       wx.uploadFile({
         url: serverUrl + '/video/upload',
         formData:{
-          userId : app.userInfo.id,
+          userId : userInfo.id, //fixme 原來的app.userInfo.id
           bgmId : bgmId,
           desc : desc,
           videoSeconds : duration,
@@ -81,42 +102,51 @@ Page({
           wx.hideLoading();
           if (data.status == 200) {
 
-            var videoId = data.data;
-            debugger;
-            wx.showLoading({
-              title: '上传中...',
-            });
-            wx.uploadFile({
-              url: serverUrl + '/video/uploadCover',
-              formData: {
-                userId: app.userInfo.id,
-                videoId: videoId
-              },
-              filePath: tempCoverUrl,
-              name: 'file',
-              header: {
-                'content-type': 'application/json'
-              },
-              success(res) {
-                var data = JSON.parse(res.data)
-                wx.hideLoading();
-                if (data.status == 200) {
-                  wx.showToast({
-                    title: '上传成功',
-                    icon: "success"
-                  });
-                  wx.navigateBack({
-                    delta: 1
-                  })
-                } else {
-                  wx.showToast({
-                    title: '上传失败',
-                    icon: 'success'
-                  })
-                }
-
-              }
+            wx.showToast({
+              title: '上传成功',
+              icon: 'success'
             })
+
+            wx.navigateBack({
+              delta: 1
+            })
+
+            // var videoId = data.data;
+            // debugger;
+            // wx.showLoading({
+            //   title: '上传中...',
+            // });
+            // wx.uploadFile({
+            //   url: serverUrl + '/video/uploadCover',
+            //   formData: {
+            //     userId: app.userInfo.id,
+            //     videoId: videoId
+            //   },
+            //   filePath: tempCoverUrl,
+            //   name: 'file',
+            //   header: {
+            //     'content-type': 'application/json'
+            //   },
+            //   success(res) {
+            //     var data = JSON.parse(res.data)
+            //     wx.hideLoading();
+            //     if (data.status == 200) {
+            //       wx.showToast({
+            //         title: '上传成功',
+            //         icon: "success"
+            //       });
+            //       wx.navigateBack({
+            //         delta: 1
+            //       })
+            //     } else {
+            //       wx.showToast({
+            //         title: '上传失败',
+            //         icon: 'success'
+            //       })
+            //     }
+
+            //   }
+            // })
             
           }else{
             wx.showToast({

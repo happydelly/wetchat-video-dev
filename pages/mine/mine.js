@@ -1,4 +1,4 @@
-// var videoUtil = require('../../utils/videoUtil.js')
+var videoUtil = require('../../utils/videoUtil.js')
 
 const app = getApp()
 
@@ -11,9 +11,9 @@ Page({
   onLoad: function () {
     var me = this;
 
-    var user = app.userInfo;
+    //var user = app.userInfo;
+    var user = app.getGlobalUserInfo();
     var serverUrl = app.serverUrl;
-
     wx.showLoading({
       title: '请等待...',
     });
@@ -22,7 +22,9 @@ Page({
       url: serverUrl + '/user/query?userId='+user.id,
       method: "POST",
       header: {
-        'content-type': 'application/json' // 默认值
+        'content-type': 'application/json', // 默认值
+        'headerUserId':user.id,
+        'headerUserToken':user.userToken
       },
       success: function (res) {
         console.log(res.data);
@@ -42,16 +44,25 @@ Page({
             receiveLikeCounts: userinfo.receiveLikeCounts,
             nickname: userinfo.nickname
           });
-
-
+        }else if(res.data.status == 502){
+            wx.showToast({
+              title: res.data.msg,
+              duration: 3000,
+              icon: "none",
+              success:function(){
+                wx.redirectTo({
+                  url: '../userLogin/login',
+                })
+              }
+            })
         }
       }
     })
 
   },
   logout: function(){
-    var user = app.userInfo;
-
+    //var user = app.userInfo;
+    var user = app.getGlobalUserInfo();
     var serverUrl = app.serverUrl;
     wx.showLoading({
       title: '请等待...',
@@ -74,7 +85,9 @@ Page({
             icon: 'success',
             duration: 2000
           });
-            app.userInfo = null;
+          //  app.userInfo = null;
+          //注销以后清空缓存
+          wx.removeStorageSync("userInfo")
             //TODO 页面跳转
             wx.redirectTo({
               url: '../userLogin/login'
@@ -98,8 +111,17 @@ Page({
           title: '上传中...',
         })
         var serverUrl = app.serverUrl;
+        var userInfo = app.getGlobalUserInfo();
+
+        if (userInfo == null || userInfo == "" || userInfo == undefined) {
+          wx.showToast({
+            title: '请先登录~~',
+            icon: 'success'
+          })
+          return;
+        }
         wx.uploadFile({
-          url: serverUrl +'/user/uploadFace?userId='+app.userInfo.id,
+          url: serverUrl + '/user/uploadFace?userId=' + userInfo.id,
           filePath: tempFilePaths[0],
           name: 'file',
           header:{
@@ -131,6 +153,7 @@ Page({
     })
   },
   uploadVideo: function(){
+    //videoUtil.uploadVideo();
     var me = this;
     wx.chooseVideo({
       sourceType: ['album', 'camera'],
